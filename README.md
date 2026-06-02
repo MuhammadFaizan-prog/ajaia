@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ajaia Docs — Collaborative Document Editor
 
-## Getting Started
+A lightweight Google Docs-inspired collaborative document editor built for the Ajaia LLC technical assessment.
 
-First, run the development server:
+## Core Features
+1. **Rich Text Editing**: Create, edit, and format text using Tiptap (bold, italic, underline, headings, lists, alignment).
+2. **File Import**: Upload `.txt` and `.md` files to automatically convert them into editable rich-text documents.
+3. **Sharing**: Securely share documents with other registered users by email.
+4. **Persistence & Autosave**: Documents are saved automatically (debounced 1.5s) to Supabase.
+5. **Ownership & Access Control**: View distinct "Owned" vs "Shared with me" documents. Row-Level Security (RLS) ensures data privacy.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tech Stack
+- **Frontend/Backend**: Next.js 14 (App Router), TypeScript
+- **Styling**: Tailwind CSS
+- **Editor**: Tiptap v2 (ProseMirror based)
+- **Database / Auth**: Supabase (PostgreSQL)
+- **Testing**: Vitest
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local Setup Instructions
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Clone or unzip the repository**
+   ```bash
+   cd ajaia
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## Learn More
+3. **Configure Environment Variables**
+   Create a `.env.local` file in the root directory based on `.env.example`:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   ```
+   *(Note: The live deployment already has these configured. If you are reviewing the code locally, you can use the test accounts on the live URL, or set up your own Supabase project using the provided `supabase/schema.sql` file).*
 
-To learn more about Next.js, take a look at the following resources:
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. **Run Tests**
+   ```bash
+   npx vitest run
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Test Accounts
+You can test the sharing flow immediately on the live deployment using these seeded accounts:
+- **Account 1**: `test1@ajaia.dev` / Password: `Test1234!`
+- **Account 2**: `test2@ajaia.dev` / Password: `Test1234!`

@@ -65,14 +65,30 @@ CREATE POLICY "documents_shared_update" ON documents
     )
   );
 
+-- Helper function to check document ownership without RLS recursion.
+-- AI-assisted: keep SECURITY DEFINER helpers outside exposed schemas.
+CREATE SCHEMA IF NOT EXISTS private;
+
+DROP FUNCTION IF EXISTS public.is_document_owner(UUID);
+
+CREATE OR REPLACE FUNCTION private.is_document_owner(doc_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.documents
+    WHERE public.documents.id = doc_id
+      AND public.documents.owner_id = auth.uid()
+  );
+$$;
+
 -- Shares: owner can manage shares for their documents
 CREATE POLICY "shares_owner_all" ON document_shares
-  FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM documents
-      WHERE id = document_shares.document_id
-        AND owner_id = auth.uid()
-    )
+  FOR ALL TO authenticated USING (
+    private.is_document_owner(document_id)
   );
 
 -- Shares: shared users can see their own share records

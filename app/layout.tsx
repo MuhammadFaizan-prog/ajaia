@@ -17,7 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="antialiased bg-gray-950 text-white min-h-screen">
+      <head>
+        <script src="https://unpkg.com/@phosphor-icons/web"></script>
+      </head>
+      <body className="antialiased bg-bg-page text-text-primary min-h-screen">
         {children}
       </body>
     </html>

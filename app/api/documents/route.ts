@@ -28,9 +28,10 @@ export async function GET() {
 
     if (sharedError) throw sharedError;
 
-    const shared = (sharedLinks ?? [])
-      .map((link) => ({ ...(link.documents as Record<string, unknown>), is_shared: true }))
-      .filter(Boolean);
+    const shared = (sharedLinks ?? []).flatMap((link) => {
+      const document = Array.isArray(link.documents) ? link.documents[0] : link.documents;
+      return document ? [{ ...(document as Record<string, unknown>), is_shared: true }] : [];
+    });
 
     return NextResponse.json({
       data: {
