@@ -316,12 +316,35 @@ body {
 
 .tiptap-editor ul,
 .tiptap-editor ol {
-  padding-left: 1.5rem;
+  padding-left: 1.75rem;
   margin: 0.5rem 0;
 }
 
+.tiptap-editor ul {
+  list-style-type: disc !important;
+}
+
+.tiptap-editor ol {
+  list-style-type: decimal !important;
+}
+
+.tiptap-editor ul ul {
+  list-style-type: circle !important;
+}
+
+.tiptap-editor ul ul ul {
+  list-style-type: square !important;
+}
+
 .tiptap-editor li {
+  display: list-item !important;
+  list-style-position: outside;
   margin: 0.25rem 0;
+}
+
+.tiptap-editor li > p {
+  display: inline;
+  margin: 0;
 }
 
 .tiptap-editor blockquote {

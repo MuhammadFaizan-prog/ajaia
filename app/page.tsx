@@ -113,7 +113,7 @@ export default function Dashboard() {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col bg-[#F5F6FA] overflow-hidden ml-0 lg:ml-[200px] xl:ml-[220px]" style={{minWidth: 0, maxWidth: '100%'}}>
+      <main className="flex-1 flex flex-col bg-[#F5F6FA] overflow-hidden ml-0 lg:ml-[200px] xl:ml-[220px] xl:mr-[280px]" style={{minWidth: 0, maxWidth: '100%'}}>
         {/* Header */}
         <header className="h-16 px-4 md:px-6 xl:px-8 flex items-center justify-between gap-3 bg-white shrink-0 border-b border-gray-100 sticky top-0 z-20">
           <button
