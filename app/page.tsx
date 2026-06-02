@@ -22,8 +22,10 @@ import {
   FolderOpen,
   Clock,
   PlusCircle,
+  Users,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import FileUploadModal from "@/components/FileUploadModal";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -32,6 +34,8 @@ export default function Dashboard() {
   const [shared, setShared] = useState<Document[]>([]);
   const [userEmail, setUserEmail] = useState("");
   const [creating, setCreating] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -93,6 +97,10 @@ export default function Dashboard() {
     return email.substring(0, 2).toUpperCase();
   };
 
+  const allDocs = [...owned, ...shared];
+  const recentDocs = [...allDocs].sort((a,b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 3);
+  const filteredDocs = allDocs.filter(d => (d.title || "Untitled").toLowerCase().includes(searchQuery.toLowerCase()));
+
   return (
     <div className="flex min-h-screen w-full overflow-hidden bg-[#F5F6FA] relative" style={{minWidth: 0}}>
       <Sidebar isOpen={sidebarOpen} />
@@ -131,6 +139,8 @@ export default function Dashboard() {
               <input
                 type="text"
                 placeholder="Search documents..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#F5F6FA] rounded-lg border border-[#E5E7EB] py-2 pl-11 pr-4 focus:ring-2 focus:ring-[#4F6EF7]/20 focus:border-[#4F6EF7] outline-none text-sm transition-all"
                 style={{ paddingLeft: '44px', paddingRight: '16px' }}
               />
@@ -166,6 +176,14 @@ export default function Dashboard() {
             <h1 className="text-2xl font-bold text-[#111827]">My Documents</h1>
             <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 w-full sm:w-auto">
               <button
+                onClick={() => setIsUploadModalOpen(true)}
+                className="w-full sm:w-auto bg-white text-[#4F6EF7] border border-[#4F6EF7] rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-blue-50 transition-all"
+                style={{ padding: '10px 20px' }}
+              >
+                <CloudArrowUp weight="bold" />
+                Import Document
+              </button>
+              <button
                 onClick={createDocument}
                 disabled={creating}
                 className="w-full sm:w-auto bg-[#4F6EF7] text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-70"
@@ -180,10 +198,10 @@ export default function Dashboard() {
           {/* Stats Cards */}
           <div className="grid gap-4 md:gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 mb-8">
             {[
-              { label: 'DOCUMENTS', title: 'Documents', count: `${owned.length} Items`, color: '#22C55E', bg: 'bg-green-50', iconColor: 'text-[#22C55E]', bar: 'w-[65%]', icon: <FileText weight="fill" className="text-2xl" /> },
-              { label: 'SHARED', title: 'Shared', count: `${shared.length} Items`, color: '#4F6EF7', bg: 'bg-blue-50', iconColor: 'text-[#4F6EF7]', bar: 'w-[40%]', icon: <UsersThree weight="fill" className="text-2xl" /> },
-              { label: 'UPLOADS', title: 'Uploads', count: '370 Items', color: '#F59E0B', bg: 'bg-amber-50', iconColor: 'text-[#F59E0B]', bar: 'w-[80%]', icon: <CloudArrowUp weight="fill" className="text-2xl" /> },
-              { label: 'STARRED', title: 'Starred', count: '457 Items', color: '#8B5CF6', bg: 'bg-purple-50', iconColor: 'text-[#8B5CF6]', bar: 'w-[25%]', icon: <Star weight="fill" className="text-2xl" /> },
+              { label: 'DOCUMENTS', title: 'My Documents', count: `${owned.length} Items`, color: '#22C55E', bg: 'bg-green-50', iconColor: 'text-[#22C55E]', bar: 'w-[65%]', icon: <FileText weight="fill" className="text-2xl" /> },
+              { label: 'SHARED', title: 'Shared with Me', count: `${shared.length} Items`, color: '#4F6EF7', bg: 'bg-blue-50', iconColor: 'text-[#4F6EF7]', bar: 'w-[40%]', icon: <UsersThree weight="fill" className="text-2xl" /> },
+              { label: 'UPLOADS', title: 'Uploads', count: `${owned.length} Items`, color: '#F59E0B', bg: 'bg-amber-50', iconColor: 'text-[#F59E0B]', bar: 'w-[80%]', icon: <CloudArrowUp weight="fill" className="text-2xl" /> },
+              { label: 'STARRED', title: 'Starred', count: '0 Items', color: '#8B5CF6', bg: 'bg-purple-50', iconColor: 'text-[#8B5CF6]', bar: 'w-[25%]', icon: <Star weight="fill" className="text-2xl" /> },
             ].map((card) => (
               <div key={card.label} className="bg-white rounded-xl border border-[#E5E7EB] hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 cursor-pointer" style={{padding: '20px'}}>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px'}}>
@@ -208,65 +226,34 @@ export default function Dashboard() {
               <button className="text-xs font-bold text-[#4F6EF7] hover:underline">View All</button>
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-              {/* Card 1 */}
-              <div
-                onClick={() => owned[0] && router.push(`/doc/${owned[0].id}`)}
-                className="min-w-0 bg-white rounded-xl border border-[#E5E7EB] hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 cursor-pointer overflow-hidden"
-              >
-                <div className="h-32 bg-blue-50 flex items-center justify-center">
-                  <FileDoc className="text-6xl text-[#4F6EF7]" />
-                </div>
-                <div className="p-4 border-t border-[#E5E7EB] flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="text-[#4F6EF7] text-lg" />
-                    <div>
-                      <p className="text-sm font-semibold text-[#111827] truncate max-w-[160px]">Article System.doc</p>
-                      <p className="text-[10px] text-[#6B7280]">Modified 2m ago</p>
-                    </div>
+              {recentDocs.map((doc, i) => (
+                <div
+                  key={doc.id}
+                  onClick={() => router.push(`/doc/${doc.id}`)}
+                  className="min-w-0 bg-white rounded-xl border border-[#E5E7EB] hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 cursor-pointer overflow-hidden"
+                >
+                  <div className={`h-32 ${i % 3 === 0 ? 'bg-blue-50' : i % 3 === 1 ? 'bg-green-50' : 'bg-amber-50'} flex items-center justify-center`}>
+                    <FileDoc className={`text-6xl ${i % 3 === 0 ? 'text-[#4F6EF7]' : i % 3 === 1 ? 'text-green-500' : 'text-amber-500'}`} />
                   </div>
-                  <button className="p-1 hover:bg-[#F5F6FA] rounded text-[#6B7280]">
-                    <DotsThreeVertical />
-                  </button>
-                </div>
-              </div>
-
-              {/* Card 2 */}
-              <div className="min-w-0 bg-white rounded-xl border border-[#E5E7EB] hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 cursor-pointer overflow-hidden">
-                <div className="h-32 bg-green-50 flex items-center justify-center">
-                  <FileText className="text-6xl text-green-500" />
-                </div>
-                <div className="p-4 border-t border-[#E5E7EB] flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="text-green-500 text-lg" />
-                    <div>
-                      <p className="text-sm font-semibold text-[#111827] truncate max-w-[160px]">Language Article.pdf</p>
-                      <p className="text-[10px] text-[#6B7280]">Modified 1h ago</p>
+                  <div className="p-4 border-t border-[#E5E7EB] flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className={`${i % 3 === 0 ? 'text-[#4F6EF7]' : i % 3 === 1 ? 'text-green-500' : 'text-amber-500'} text-lg`} />
+                      <div>
+                        <p className="text-sm font-semibold text-[#111827] truncate max-w-[160px]">{doc.title || "Untitled"}</p>
+                        <p className="text-[10px] text-[#6B7280]">
+                          {new Date(doc.updated_at).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
+                    <button className="p-1 hover:bg-[#F5F6FA] rounded text-[#6B7280]">
+                      <DotsThreeVertical />
+                    </button>
                   </div>
-                  <button className="p-1 hover:bg-[#F5F6FA] rounded text-[#6B7280]">
-                    <DotsThreeVertical />
-                  </button>
                 </div>
-              </div>
-
-              {/* Card 3 */}
-              <div className="min-w-0 bg-white rounded-xl border border-[#E5E7EB] hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 cursor-pointer overflow-hidden">
-                <div className="h-32 bg-gray-50 flex items-center justify-center">
-                  <FileText className="text-6xl text-gray-400" />
-                </div>
-                <div className="p-4 border-t border-[#E5E7EB] flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="text-[#6B7280] text-lg" />
-                    <div>
-                      <p className="text-sm font-semibold text-[#111827] truncate max-w-[160px]">Test Scores.xls</p>
-                      <p className="text-[10px] text-[#6B7280]">Modified 5h ago</p>
-                    </div>
-                  </div>
-                  <button className="p-1 hover:bg-[#F5F6FA] rounded text-[#6B7280]">
-                    <DotsThreeVertical />
-                  </button>
-                </div>
-              </div>
+              ))}
+              {recentDocs.length === 0 && (
+                <p className="text-sm text-[#6B7280] col-span-3">No recent documents</p>
+              )}
             </div>
           </div>
 
@@ -280,6 +267,8 @@ export default function Dashboard() {
                   <input
                     type="text"
                     placeholder="Search in table..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full bg-[#F5F6FA] rounded-lg border border-[#E5E7EB] py-1.5 pl-9 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#4F6EF7]"
                     style={{ paddingLeft: '36px', paddingRight: '16px' }}
                   />
@@ -322,7 +311,9 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-[#E5E7EB]">
-                  {owned.map((doc) => (
+                  {filteredDocs.map((doc) => {
+                    const isShared = shared.some(s => s.id === doc.id);
+                    return (
                     <tr
                       key={doc.id}
                       onClick={() => router.push(`/doc/${doc.id}`)}
@@ -333,19 +324,22 @@ export default function Dashboard() {
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded bg-blue-50 flex items-center justify-center text-[#4F6EF7]">
-                            <FileDoc />
+                          <div className={`w-8 h-8 rounded ${isShared ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-[#4F6EF7]'} flex items-center justify-center`}>
+                            {isShared ? <Users size={16} /> : <FileDoc size={16} />}
                           </div>
-                          <span className="font-medium text-[#111827]">{doc.title || "Untitled"}</span>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-[#111827]">{doc.title || "Untitled"}</span>
+                            {isShared && <span className="text-[10px] text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded w-max mt-0.5 font-medium">Shared</span>}
+                          </div>
                         </div>
                       </td>
                       <td className="hidden md:table-cell px-4 py-4">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-[10px] font-bold text-orange-600">
-                            {getInitials(userEmail)}
+                            {isShared ? "U" : getInitials(userEmail)}
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-[#111827]">You</p>
+                            <p className="text-xs font-bold text-[#111827]">{isShared ? "Colleague" : "You"}</p>
                             <p className="text-[10px] text-[#6B7280]">Owner</p>
                           </div>
                         </div>
@@ -357,8 +351,9 @@ export default function Dashboard() {
                         <CheckCircle className="text-[#22C55E] text-lg" />
                       </td>
                     </tr>
-                  ))}
-                  {owned.length === 0 && (
+                    );
+                  })}
+                  {filteredDocs.length === 0 && (
                     <tr>
                       <td colSpan={7} className="py-12 text-center text-[#6B7280] text-sm">
                         No documents yet. Create your first one!
@@ -439,6 +434,12 @@ export default function Dashboard() {
           </div>
         </div>
       </aside>
+      {isUploadModalOpen && (
+        <FileUploadModal
+          onClose={() => setIsUploadModalOpen(false)}
+          onSuccess={(docId) => { setIsUploadModalOpen(false); router.push(`/doc/${docId}`); }}
+        />
+      )}
     </div>
   );
 }

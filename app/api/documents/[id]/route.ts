@@ -118,3 +118,5 @@ export async function DELETE(_req: Request, { params }: RouteContext) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+// PATCH /api/documents/[id] — alias for PUT (granular title-only updates)
+export const PATCH = PUT;

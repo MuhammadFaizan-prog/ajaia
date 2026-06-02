@@ -97,6 +97,12 @@ export default function EditorPage({
     }, 1500);
   };
 
+  // Immediately persist title on blur or Enter key (satisfies explicit save requirement)
+  const handleTitleCommit = (newTitle: string) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveDocument(newTitle, pendingContent.current);
+  };
+
   const getInitials = (email: string) => {
     if (!email) return "U";
     return email.substring(0, 2).toUpperCase();
@@ -118,8 +124,10 @@ export default function EditorPage({
               type="text" 
               value={title || "Untitled"}
               onChange={(e) => isOwner && handleTitleChange(e.target.value)}
+              onBlur={(e) => isOwner && handleTitleCommit(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); isOwner && handleTitleCommit((e.target as HTMLInputElement).value); (e.target as HTMLInputElement).blur(); } }}
               readOnly={!isOwner}
-              className="-ml-1 w-[min(52vw,420px)] max-w-full truncate border-b border-transparent bg-transparent px-1 text-lg font-bold text-primary focus:border-[#4F6EF7] focus:outline-none hover:border-gray-200"
+              className={`-ml-1 w-[min(52vw,420px)] max-w-full truncate border-b border-transparent bg-transparent px-1 text-lg font-bold text-primary focus:border-[#4F6EF7] focus:outline-none hover:border-gray-200 ${!isOwner ? 'cursor-default' : ''}`}
             />
             <div className="flex items-center gap-1.5 text-[10px] text-[#22C55E] font-medium px-1">
               <CheckCircle weight="bold" className="hidden sm:block" /> 
@@ -164,7 +172,7 @@ export default function EditorPage({
         <TiptapEditor
           content={content}
           onChange={handleContentChange}
-          editable={true}
+          editable={isOwner}
         />
         
         {/* Footer */}
